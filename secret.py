@@ -1,46 +1,68 @@
-sxf_key=['Saber','Lancer','Archer','Rider','Caster','Assassin','Berserker','Shielder']
-encode_bytes=[]
+sxf_key = {
+    'Saber': [1, 5],
+    'Lancer': [2, 4],
+    'Archer': [3, 6],
+    'Rider': [4, 2],
+    'Caster': [5, 1],
+    'Assassin': [6, 3],
+    'Berserker': [7, 0],
+    'Shielder': [0, 7]
+}
 
 
-def encrypt(infile,outfile,key,key_if=False,name_if=False):
-    with open(outfile,'wb') as outf:
+def encrypt(infile, outfile, key, key_if=False, name_if=False):
+    if key not in sxf_key:
+        return False
+    with open(outfile, 'wb') as outf:
         if key_if:
             outf.write(chr(len(key)).encode())
-            key_bytes = bytes(key,encoding='utf8')
-            encode_bytes.clear()
-            for byte in key_bytes:
-                encode_bytes.append(byte^7)
-            outf.write(bytes(encode_bytes))
+            buff = bytes(key, encoding='utf8')
+            buff = map(lambda x: x ^ 7, buff)
+            outf.write(bytes(buff))
         else:
             outf.write(bytes([0]))
 
         if name_if:
             outf.write(chr(len(infile)).encode())
-            name_bytes = bytes(infile,encoding='utf8')
-            encode_bytes.clear()
-            for byte in name_bytes:
-                encode_bytes.append(byte^7)
-            outf.write(bytes(encode_bytes))
+            buff = bytes(infile, encoding='utf8')
+            buff = map(lambda x: x ^ 7, buff)
+            outf.write(bytes(buff))
         else:
             outf.write(bytes([0]))
 
-def decrypt(infile,outfile=None,key=None):
-    with open(infile,'rb') as inf:
-        key_len=ord(inf.read(1))
-        if key_len:
-            key_bytes = inf.read(key_len)
-            encode_bytes.clear()
-            for byte in key_bytes:
-                encode_bytes.append(byte^7)
-            print(bytes(encode_bytes).decode('utf8'))
+        flag = sxf_key[key][0] ^ 7
+        with open(infile, 'rb') as inf:
+            buff = inf.read(1024)
+            while buff:
+                buff = map(lambda x: x ^ flag, buff)
+                outf.write(bytes(buff))
+                buff = inf.read(1024)
+    return True
 
-        name_len=ord(inf.read(1))
-        if name_len:
-            name_bytes = inf.read(name_len)
-            encode_bytes.clear()
-            for byte in name_bytes:
-                encode_bytes.append(byte^7)
-            print(bytes(encode_bytes).decode())
 
-encrypt('tmp','outtmp','Saber',True,True)
-decrypt('outtmp')
+def decrypt(infile, outfile=None, key=None):
+    with open(infile, 'rb') as inf:
+        key_len = ord(inf.read(1))
+        buff = inf.read(key_len)
+        key_ = bytes(map(lambda x: x ^ 7, buff)).decode('utf8')
+        if not key:
+            key = key_
+        if key not in sxf_key:
+            return False
+
+        name_len = ord(inf.read(1))
+        buff = inf.read(name_len)
+        outfile_ = bytes(map(lambda x: x ^ 7, buff)).decode('utf8')
+        if not outfile:
+            outfile = outfile_
+        if not outfile:
+            return False
+
+        flag = (7 - sxf_key[key][1]) ^ 7
+        with open(outfile, 'wb') as outf:
+            buff = inf.read(1024)
+            while buff:
+                buff = map(lambda x: x ^ flag, buff)
+                outf.write(bytes(buff))
+                buff = inf.read(1024)
+    return True
