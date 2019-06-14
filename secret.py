@@ -40,7 +40,7 @@ def encrypt(infile, outfile, key, key_if=False, name_if=False):
     return True
 
 
-def decrypt(infile, outfile=None, key=None):
+def decrypt(infile, outfile='', key=''):
     with open(infile, 'rb') as inf:
         key_len = ord(inf.read(1))
         buff = inf.read(key_len)
@@ -66,3 +66,27 @@ def decrypt(infile, outfile=None, key=None):
                 outf.write(bytes(buff))
                 buff = inf.read(1024)
     return True
+
+
+if __name__ == '__main__':
+    slt = input('请选择:1.加密\t2.解密')
+    if slt == '1':
+        infile = input('原文件')
+        outfile = input('输出文件')
+        key = input('秘钥')
+        keyif = input('秘钥写入输入任意字符')
+        nameif = input('文件名写入输入任意字符')
+        if encrypt(infile, outfile, key, bool(key), bool(nameif)):
+            print('文件加密成功')
+        else:
+            print('文件加密失败')
+    elif slt == '2':
+        infile = input('加密文件')
+        outfile = input('输出文件')
+        key = input('秘钥')
+        if decrypt(infile, outfile, key):
+            print('文件解密成功')
+        else:
+            print('文件解密失败')
+    else:
+        print('输入不正确')
