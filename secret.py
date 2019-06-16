@@ -1,13 +1,45 @@
-sxf_key = {
-    'Saber': [1, 5],
-    'Lancer': [2, 4],
-    'Archer': [3, 6],
-    'Rider': [4, 2],
-    'Caster': [5, 1],
-    'Assassin': [6, 3],
-    'Berserker': [7, 0],
-    'Shielder': [0, 7]
-}
+sxf_key = [
+    'Saber',
+    'Lancer',
+    'Archer',
+    'Rider',
+    'Caster',
+    'Assassin',
+    'Berserker',
+    'Shielder'
+]
+
+sxf_value =[
+    'Archer',
+    'Saber',
+    'Lancer',
+    'Assassin',
+    'Rider',
+    'Caster',
+    'Shielder',
+    'Berserker'
+]
+
+
+def biter(infile,key='Saber'):
+    if key not in sxf_key:
+        return False
+    with open(infile,'rb+') as inf:
+        flag = 1<<sxf_key.index(key)
+        buff = inf.read(1024*flag)
+        buff = map(lambda x: x ^ flag, buff)
+        inf.seek(0)
+        inf.write(bytes(buff))
+
+def unbiter(infile,key='Archer'):
+    if key not in sxf_key:
+        return False
+    with open(infile,'rb+') as inf:
+        flag = 1<<sxf_value.index(key)
+        buff = inf.read(1024*flag)
+        buff = map(lambda x: x ^ flag, buff)
+        inf.seek(0)
+        inf.write(bytes(buff))
 
 
 def encrypt(infile, outfile, key, key_if=False, name_if=False):
@@ -16,7 +48,7 @@ def encrypt(infile, outfile, key, key_if=False, name_if=False):
     with open(outfile, 'wb') as outf:
         if key_if:
             outf.write(chr(len(key)).encode())
-            buff = bytes(key, encoding='utf8')
+            buff = bytes(sxf_value[sxf_key.index(key)], encoding='utf8')
             buff = map(lambda x: x ^ 7, buff)
             outf.write(bytes(buff))
         else:
@@ -30,7 +62,7 @@ def encrypt(infile, outfile, key, key_if=False, name_if=False):
         else:
             outf.write(bytes([0]))
 
-        flag = sxf_key[key][0] ^ 7
+        flag = 1<<sxf_key.index(key)
         with open(infile, 'rb') as inf:
             buff = inf.read(1024)
             while buff:
@@ -58,7 +90,7 @@ def decrypt(infile, outfile='', key=''):
         if not outfile:
             return False
 
-        flag = (7 - sxf_key[key][1]) ^ 7
+        flag = 1<<sxf_value.index(key)
         with open(outfile, 'wb') as outf:
             buff = inf.read(1024)
             while buff:
