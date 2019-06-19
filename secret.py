@@ -37,8 +37,9 @@ def encrypt(infile, outfile, key='Saber', key_if=False, name_if=False):
         return False
     with open(outfile, 'wb') as outf:
         if key_if:
-            outf.write(chr(len(key)).encode())
-            buff = sxf_value[sxf_key.index(key)].encode()
+            value = sxf_value[sxf_key.index(key)]
+            outf.write(chr(len(value)).encode())
+            buff = value.encode()
             outf.write(byte_lock(buff))
         else:
             outf.write(bytes([0]))
@@ -59,7 +60,7 @@ def encrypt(infile, outfile, key='Saber', key_if=False, name_if=False):
     return True
 
 
-def decrypt(infile, outfile='', key='Archer'):
+def decrypt(infile, outfile, key='Archer'):
     # 先读取文件头的相关信息,再根据key对文件进行解密
     with open(infile, 'rb') as inf:
         key_len = ord(inf.read(1))
@@ -93,7 +94,7 @@ def enbiter(infile, key='Saber'):
         return False
     with open(infile, 'rb+') as inf:
         flag = 1 << sxf_key.index(key)
-        buff = inf.read(1024 * flag)
+        buff = inf.read((1 + sxf_key.index(key)) << 20)
         inf.seek(0)
         inf.write(byte_lock(buff, flag))
     return True
@@ -105,7 +106,7 @@ def debiter(infile, key='Archer'):
         return False
     with open(infile, 'rb+') as inf:
         flag = 1 << sxf_value.index(key)
-        buff = inf.read(1024 * flag)
+        buff = inf.read((1 + sxf_key.index(key)) << 20)
         inf.seek(0)
         inf.write(byte_lock(buff, flag))
     return True
@@ -128,9 +129,10 @@ def batch_enbiter(key='Saber'):
     else:
         print('批量加密完成')
         ret = True
-    with open('0', 'wb') as f:
-        buff = byte_lock(json.dumps(names).encode())
-        f.write(buff)
+    if ret:
+        with open('0', 'wb') as f:
+            buff = byte_lock(json.dumps(names).encode())
+            f.write(buff)
     return ret
 
 
