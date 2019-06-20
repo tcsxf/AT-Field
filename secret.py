@@ -120,10 +120,10 @@ def batch_enbiter(key='Saber'):
     for i, n in enumerate(os.listdir()):
         # 判断文件
         can = os.path.isfile(n)
-        #判断读写权限
-        can &=os.access(n,6)
-        #剔除指定类型文件
-        can &= n[-3:] not in ('BIN','bin','sys','.py')
+        # 判断读写权限
+        can &= os.access(n, 6)
+        # 剔除指定类型文件
+        can &= n[-3:] not in ('BIN', 'bin', 'sys', '.py')
         if can:
             if enbiter(n, key):
                 os.rename(n, str(i + 1))
