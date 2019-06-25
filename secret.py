@@ -112,49 +112,55 @@ def debiter(infile, key='Archer'):
     return True
 
 
-def batch_enbiter(key='Saber'):
+def batch_enbiter(key='Saber', path='.', rec=False):
     # 用key批量加密当前文件夹下所有文件,并重命名
-    # 把文件对应关系写到0文件中
+    # 把文件对应关系写到0.sxf文件中
     names = {}
     ret = False
-    for i, n in enumerate(os.listdir()):
-        # 判断文件
-        can = os.path.isfile(n)
+    for i, n in enumerate(os.listdir(path)):
+        fd = os.path.join(path, n)
         # 判断读写权限
-        can &= os.access(n, 6)
+        if not os.access(fd, 6):
+            continue
+        if rec and os.path.isdir(fd):
+            batch_enbiter(key, fd, rec)
+            continue
+
+        # 判断是否文件
+        can = os.path.isfile(fd)
         # 剔除指定类型文件
-        can &= n[-3:] not in ('BIN', 'bin', 'sys', '.py')
+        can &= fd[-3:] not in ('BIN', 'bin', 'sys', '.py', 'pyc')
         if can:
-            if enbiter(n, key):
-                os.rename(n, str(i + 1))
-                names[str(i + 1)] = n
-                print(n + ' 加密成功')
+            if enbiter(fd, key):
+                os.rename(fd, os.path.join(path, str(i + 1) + '.sxf'))
+                names[str(i + 1) + '.sxf'] = n
             else:
-                print(n + ' 加密失败')
                 break
     else:
-        print('批量加密完成')
         ret = True
     if ret:
-        with open('0', 'wb') as f:
+        with open(os.path.join(path, '0.sxf'), 'wb') as f:
             buff = byte_lock(json.dumps(names).encode())
             f.write(buff)
     return ret
 
 
-def batch_debiter(key='Archer'):
+def batch_debiter(key='Archer', path='.', rec=False):
     # 读取0文件的文件名对应关系
-    # 用key批量解密当前文件家下面所有文件
-    with open('0', 'rb') as f:
-        buff = byte_lock(f.read())
-        names = json.loads(buff)
-    for i, n in names.items():
-        if debiter(i, key):
-            print(i + ' 解密成功')
-            os.rename(i, n)
-        else:
-            print(i + ' 解密失败')
-            return False
-    else:
-        print('批量解密完成')
+    # 用key批量解密当前文件夹下面所有文件
+    for i, n in enumerate(os.listdir(path)):
+        fd = os.path.join(path, n)
+        if rec and os.path.isdir(fd):
+            batch_debiter(key, fd, rec)
+            continue
+        if n == '0.sxf':
+            with open(fd, 'rb') as f:
+                buff = byte_lock(f.read())
+                names = json.loads(buff)
+            for k, v in names.items():
+                if debiter(os.path.join(path, k), key):
+                    os.rename(os.path.join(path, k), os.path.join(path, v))
+                else:
+                    return False
+            os.remove(fd)
     return True

@@ -24,11 +24,12 @@ elif tp == '2':
         if debiter(infile, key):
             print('解密成功')
 elif tp == '3':
+    rec = input('输入任意字符递归操作子文件夹\n')
     if act == '1':
-        if batch_enbiter(key):
+        if batch_enbiter(key, rec=rec):
             print('批量加密成功')
     elif act == '2':
-        if batch_debiter(key):
+        if batch_debiter(key, rec=rec):
             print('批量解密成功')
 else:
     print('操作失败')
