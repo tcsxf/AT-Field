@@ -87,7 +87,7 @@ def ezbiter(infile, key='Saber'):
     return True
 
 
-def batch_biter(key='Saber', path='.', rec=False):
+def batch_biter(path='.', key='Saber', rec=False):
     # 用key批量加密当前文件夹下所有文件,并重命名
     # 把文件对应关系写到0.sxf文件中
     names = {}
@@ -115,7 +115,7 @@ def batch_biter(key='Saber', path='.', rec=False):
     return ret
 
 
-def batch_debiter(key='Saber', path='.', rec=False):
+def batch_debiter(path='.', key='Saber', rec=False):
     # 读取0文件的文件名对应关系
     # 用key批量解密当前文件夹下面所有文件
     for i, n in enumerate(os.listdir(path)):

@@ -25,10 +25,10 @@ elif tp == '2':
 elif tp == '3':
     rec = input('输入任意字符递归操作子文件夹\n')
     if act == '1':
-        if batch_biter(key, inf, rec):
+        if batch_biter(inf, key, rec):
             print('批量加密成功')
     elif act == '2':
-        if batch_debiter(key, inf, rec):
+        if batch_debiter(inf, key, rec):
             print('批量解密成功')
 elif tp == '4':
     get_key(inf)
