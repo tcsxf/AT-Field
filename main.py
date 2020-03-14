@@ -34,3 +34,4 @@ elif tp == '4':
     get_key(inf)
 else:
     print('操作失败')
+input('结束')
